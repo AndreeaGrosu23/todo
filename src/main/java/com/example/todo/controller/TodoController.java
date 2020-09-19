@@ -1,5 +1,7 @@
-package com.example.todo.tasks;
+package com.example.todo.controller;
 
+import com.example.todo.model.Todo;
+import com.example.todo.repository.TodoRepository;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.web.bind.annotation.*;
 
@@ -10,29 +12,29 @@ import java.util.Optional;
 @RequestMapping
 public class TodoController {
 
-    private final TodoService todoService;
+    private final TodoRepository todoRepository;
 
     @Autowired
-    public TodoController(TodoService todoService) {
-        this.todoService = todoService;
+    public TodoController(TodoRepository todoRepository) {
+        this.todoRepository = todoRepository;
     }
 
     // Add new task
     @PostMapping("/addTodo")
     public void addTodo(@RequestParam("todo-title") String title) {
         Todo newTodo = new Todo(title);
-        todoService.addTodo(newTodo);
+        todoRepository.save(newTodo);
     }
 
     // List all tasks
     @PostMapping("/list")
     public List<Todo> getAllTodos(@RequestParam("status") String status) {
         if(status.isEmpty()) {
-            return todoService.findAll();
+            return todoRepository.findAll();
         } else if (status.equals("active")) {
-            return todoService.findAllByCompleted(false);
+            return todoRepository.findAllByCompleted(false);
         } else if (status.equals("complete")) {
-            return todoService.findAllByCompleted(true);
+            return todoRepository.findAllByCompleted(true);
         }
         return null;
     }
@@ -40,7 +42,7 @@ public class TodoController {
     // Delete all completed tasks
     @DeleteMapping("/todos/completed")
     public void removeCompleted() {
-        todoService.removeCompleted();
+        todoRepository.removeCompleted();
     }
 
     //Toggle status for all
@@ -49,34 +51,33 @@ public class TodoController {
         boolean completed = complete.equals("true");
 
         if(completed) {
-            todoService.updateStatus(true);
+            todoRepository.updateStatus(true);
         } else {
-            todoService.updateStatus(false);
+            todoRepository.updateStatus(false);
         }
     }
 
     // Delete task by id
     @DeleteMapping("/todos/{id}")
     public void deleteById(@PathVariable("id") int id) {
-        todoService.deleteById(id);
+        todoRepository.deleteById(id);
     }
 
     // Update title by ID
     @PutMapping("/todos/{id}")
     public void updateTitleById(@PathVariable("id") int id, @RequestParam("todo-title") String title) {
-        todoService.updateTitleById(title,id);
+        todoRepository.updateTitleById(title,id);
     }
 
     // Find task by id
     @GetMapping("/todos/{id}")
     public Optional<Todo> getById(@PathVariable("id") int id) {
-        return todoService.getById(id);
+        return todoRepository.findById(id);
     }
-
     // Toggle the task status by id
     @PutMapping("/todos/{id}/toggle_status")
     public void toggleStatus(@PathVariable("id") int id, @RequestParam("status") String status) {
         boolean isCompleted = status.equals("true");
-        todoService.toggleStatus(isCompleted, id);
+        todoRepository.updateStatusById(isCompleted, id);
     }
 }
