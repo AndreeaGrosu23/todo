@@ -1,6 +1,7 @@
 package com.example.todo.controller;
 
 import com.example.todo.model.Todo;
+import com.example.todo.model.TodoForm;
 import com.example.todo.repository.TodoRepository;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.http.HttpStatus;
@@ -27,20 +28,20 @@ public class TodoController {
 
     // Add new task
     @PostMapping("/addTodo")
-    public ResponseEntity addTodo(@RequestParam("todo-title") String title) {
-        Todo newTodo = new Todo(title);
+    public ResponseEntity addTodo(@RequestBody TodoForm title) {
+        Todo newTodo = new Todo(title.getName());
         todoRepository.save(newTodo);
         return ResponseEntity.noContent().build();
     }
 
     // List all tasks
     @PostMapping("/list")
-    public ResponseEntity getAllTodos(@RequestParam("status") String status) {
-        if(status.isEmpty()) {
+    public ResponseEntity getAllTodos(@RequestBody TodoForm status) {
+        if(status.getName().isEmpty()) {
             return ResponseEntity.ok(this.todoRepository.findAll());
-        } else if (status.equals("active")) {
+        } else if (status.getName().equals("active")) {
             return ResponseEntity.ok(this.todoRepository.findAllByCompleted(false));
-        } else if (status.equals("complete")) {
+        } else if (status.getName().equals("complete")) {
             return ResponseEntity.ok(this.todoRepository.findAllByCompleted(true));
         }
         return ResponseEntity.noContent().build();
@@ -55,8 +56,8 @@ public class TodoController {
 
     //Toggle status for all
     @PutMapping("/todos/toggle_all")
-    public ResponseEntity toggleAll(@RequestParam("toggle-all") String complete) {
-        boolean completed = complete.equals("true");
+    public ResponseEntity toggleAll(@RequestBody TodoForm complete) {
+        boolean completed = complete.getName().equals("true");
 
         if(completed) {
             todoRepository.updateStatus(true);
@@ -75,9 +76,9 @@ public class TodoController {
 
     // Update title by ID
     @PutMapping("/todos/{id}")
-    public ResponseEntity updateTitleById(@PathVariable("id") int id, @RequestParam("todo-title") String title) {
+    public ResponseEntity updateTitleById(@PathVariable("id") int id, @RequestBody TodoForm title) {
         if (todoRepository.findById(id).isPresent()) {
-            todoRepository.updateTitleById(title,id);
+            todoRepository.updateTitleById(title.getName(),id);
             return ResponseEntity.noContent().build();
         }
         return new ResponseEntity<>("Todo not found", HttpStatus.NOT_FOUND);
@@ -94,8 +95,8 @@ public class TodoController {
 
     // Toggle the task status by id
     @PutMapping("/todos/{id}/toggle_status")
-    public ResponseEntity toggleStatus(@PathVariable("id") int id, @RequestParam("status") String status) {
-        boolean isCompleted = status.equals("true");
+    public ResponseEntity toggleStatus(@PathVariable("id") int id, @RequestBody TodoForm status) {
+        boolean isCompleted = status.getName().equals("true");
         todoRepository.updateStatusById(isCompleted, id);
         return ResponseEntity.noContent().build();
     }
