@@ -16,7 +16,7 @@ import java.util.List;
 @Builder
 @NoArgsConstructor
 @AllArgsConstructor
-public class TodoAppUser {
+public class TodoUser {
 
     @Id
     @GeneratedValue(strategy = GenerationType.AUTO)
